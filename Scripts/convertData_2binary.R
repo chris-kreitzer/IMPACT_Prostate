@@ -1,9 +1,11 @@
-## convert maf, fusion and cna annotation into binary matrix
-## m [rows] == genes x n[columns] = patients
-## use gene panel 468 MSK
-## data is coming from MSKCC github enterprise ~ see layout there
+## modify fetched data from (github) [mut, cna, fusion] and create binary matrix;
+## m (samples) x n (genes) format is needed for oncoprint (complexheatmap)
+## data.mutation, data.cna and data.fusion are getting converted and integrated
+## gene.panel: IMPACT 468 is considered
 
-## MAF format as usual.
+
+## input data must be in the same format as obtained from github
+## please check out
 
 mutation.matrix = function(mut, cna){
   gene.panel = read.csv('~/Documents/MSKCC/00_Data/IMPACT_DATA_2020.08/impact468_gene_panel.txt', sep = '\t')
@@ -22,8 +24,6 @@ mutation.matrix = function(mut, cna){
   row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
   row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
   row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
-  
-  # data.fusion = as.data.frame(fusion)
   
   # create empty alteration matrix
   alteration_matrix = setNames(data.frame(matrix(ncol = length(gene.panel$genes), nrow = 0)), gene.panel$genes)
@@ -52,8 +52,10 @@ mutation.matrix = function(mut, cna){
               data.cna = data.cna))
 }
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# add SCNA data to SNVs
+
+## integrate cna and fusion data and add to mut.matrix (mutation.matrix)
+## row.names == samples; colnames == genes (IMPACT 468)
+
 onco.matrix = function(mut, cna, fusion){
   out = mutation.matrix(mut = mut, cna = cna)
   
