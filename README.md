@@ -8,6 +8,7 @@ date of data retrieval: 09/01/2020
 - data_mutations_extended.txt
 - data_CNA.txt
 - data_fusions.txt
+- IMPACT 468 is considered (working with those genes)
 - pathway annotation: OncoPath12; Bastien
 
 #### sample selection (top plot): ONE sample per patient   
