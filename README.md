@@ -23,4 +23,10 @@ date of data retrieval: 09/01/2020
 - InFrame_Mutations: 'In_Frame_Ins', 'In_Frame_Del'
 - VUS: '3\'Flank', '5\'UTR', 'Intron', 'Splice_Region', 'Nonstop_Mutation', 'Translation_Start_Site', '5\'Flank'
 
+#### Tumor mutational burden:
+TMB is defined as the number of somatic, coding, base substitution (including INDEL mutations) per megabase of genome examined). Variants outside coding regions are neglected. Synonymous mutations are counted. Their presence is a signal of mutational processes that will aslo have resulted in nonsynonymous mutations and neoantigens elsewhere in the genome. [PMID:28420421](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5395719/)
+
+For MSKCC samples, the mutation count was divided by   
+**0.896665**, **1.016478**, and **1.139322** Mb for the 341-, 410- and 468-gene panels, respectively. [PMID: 31832578](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6907021/)
+
 
