@@ -10,6 +10,13 @@ date of data retrieval: 09/01/2020
 - data_fusions.txt
 - pathway annotation: OncoPath12; Bastien
 
+#### sample selection (top plot): ONE sample per patient   
+- if just one sample --> take it
+- if multiple samples, priority is given to primary sample
+- if multiple samples and no primary available: i) max tumor purity and ii) coverage of sample
+- all panels are included (ACCESS129 IMPACT341 IMPACT410 IMPACT468)
+- n = 2,588 remaining
+
 #### mutation classification:
 - truncating classes: 'Nonsense_Mutation', 'Splice_Site', 'Frame_Shift_Del', 'Frame_Shift_Ins'
 - InFrame_Mutations: 'In_Frame_Ins', 'In_Frame_Del'
