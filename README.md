@@ -1,8 +1,9 @@
 # IMPACT_Prostate
 
 This repo contains scripts used to analyse MSK_IMPACT Prostate samples;
-cut off date for sample and data retrieval: 09/01/2020
-
+Data fetched from https://github.mskcc.org/knowledgesystems/dmp-2020/tree/master/mskimpact (controlled access)<br />
+date of data retrieval: 09/01/2020
+***
 #### data: MSKCC github enterprise;
 - data_mutations_extended.txt
 - data_CNA.txt
