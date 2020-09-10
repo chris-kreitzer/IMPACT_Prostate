@@ -31,6 +31,6 @@ For MSKCC samples, the mutation count was divided by
 
 #### INDEL load
 INDEL == 'Ins' & 'Del'
-rel.INDEL.load = ('INS' + 'DEL') / ('INS' + 'DEL' + 'SNP')
+rel.INDEL.load = ('INS' + 'DEL') / ('INS' + 'DEL' + 'SNP' + 'DNP' + 'ONP')
 
-'DNT', 'OLG' are not considered as INDELS
+'DNP', 'ONP' are not considered as INDELS
