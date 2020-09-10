@@ -29,4 +29,8 @@ TMB is defined as the number of somatic, coding, base substitution (including IN
 For MSKCC samples, the mutation count was divided by   
 **0.896665**, **1.016478**, and **1.139322** Mb for the 341-, 410- and 468-gene panels, respectively. [PMID: 31832578](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6907021/)
 
+#### INDEL load
+INDEL == 'Ins' & 'Del'
+rel.INDEL.load = ('INS' + 'DEL') / ('INS' + 'DEL' + 'SNP')
 
+'DNT', 'OLG' are not considered as INDELS
