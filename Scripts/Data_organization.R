@@ -96,5 +96,6 @@ save(PRAD.samples,
      PRAD.IMPACT.SV,
      PRAD_IMPACT_TMB,
      PRAD.IMPACT.indel,
+     PRAD_meta.data,
      file = '~/Documents/MSKCC/03_Prostate/tmp_data/data.files.RData')
 

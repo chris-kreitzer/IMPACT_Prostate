@@ -1,10 +1,3 @@
-## create meta data for oncoPrint
-
-## INDEL LOAD
-## Purity
-## Coverage
-## number of patient (right) + procent
-
 ## INDEL LOAD
 
 INDEL_Annotation = function(mut.data){
