@@ -34,3 +34,9 @@ INDEL == 'Ins' & 'Del'
 rel.INDEL.load = ('INS' + 'DEL') / ('INS' + 'DEL' + 'SNP' + 'DNP' + 'ONP')
 
 'DNP', 'ONP' are not considered as INDELS
+
+#### OncoPrint:
+- data fetched from GitHub Enterprise MSKCC dmp2020 (see above)
+- only genes with alteration frequency > 2% are shown
+- TMB/INDEL load (top annotation) are calculated like points mentioned above
+- SOMATIC alterations are excluded from the OncoPrint
