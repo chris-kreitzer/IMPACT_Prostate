@@ -5,8 +5,12 @@
 
 
 ## input data must be in the same format as obtained from github
-## please check out
 
+## to do ~~
+## values found in data.cna (not sure if there is any difference)
+## "0", " 0", "-2", "2", " 2", " 0.0", " 2.0", "-2.0", "-1.5"
+## 
+     
 mutation.matrix = function(mut, cna){
   gene.panel = read.csv('~/Documents/MSKCC/00_Data/IMPACT_DATA_2020.08/impact468_gene_panel.txt', sep = '\t')
   sample = data.frame(genes = 'Sample.ID')
@@ -136,3 +140,4 @@ onco.matrix = function(mut, cna, fusion){
   
   return(Somatic_alteration_matrix)
 }
+
