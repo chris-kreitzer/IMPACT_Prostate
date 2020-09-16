@@ -6,7 +6,7 @@ date of data retrieval: 09/01/2020
 ***
 #### data: MSKCC github enterprise
 - data_mutations_extended.txt
-- data_CNA.txt
+- data_CNA.txt (unique values: "0", " 0", "-2", "2", " 2", " 0.0", " 2.0", "-2.0", "-1.5")
 - data_fusions.txt
 - IMPACT 468 is considered (working with those genes)
 - pathway annotation: OncoPath12; Bastien
