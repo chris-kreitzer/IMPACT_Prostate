@@ -1,15 +1,11 @@
 ## modify fetched data from (github) [mut, cna, fusion] and create binary matrix;
 ## m (samples) x n (genes) format is needed for oncoprint (complexheatmap)
 ## data.mutation, data.cna and data.fusion are getting converted and integrated
-## gene.panel: IMPACT 468 is considered
-
 
 ## input data must be in the same format as obtained from github
 
-## to do ~~
 ## values found in data.cna (not sure if there is any difference)
 ## "0", " 0", "-2", "2", " 2", " 0.0", " 2.0", "-2.0", "-1.5"
-## 
      
 mutation.matrix = function(mut, cna){
   gene.panel = read.csv('~/Documents/MSKCC/00_Data/IMPACT_DATA_2020.08/impact468_gene_panel.txt', sep = '\t')
@@ -21,13 +17,13 @@ mutation.matrix = function(mut, cna){
   
   # data somatic copy number alterations
   data.cna = as.data.frame(cna)
-  data.cna = t(data.cna)
-  colnames(data.cna) = data.cna[1, ]
-  data.cna = as.data.frame(data.cna)
-  data.cna = data.cna[-1, ]
-  row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
-  row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
-  row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
+  # data.cna = t(data.cna)
+  # colnames(data.cna) = data.cna[1, ]
+  # data.cna = as.data.frame(data.cna)
+  # data.cna = data.cna[-1, ]
+  # row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
+  # row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
+  # row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
   
   # create empty alteration matrix
   alteration_matrix = setNames(data.frame(matrix(ncol = length(gene.panel$genes), nrow = 0)), gene.panel$genes)
@@ -140,4 +136,9 @@ onco.matrix = function(mut, cna, fusion){
   
   return(Somatic_alteration_matrix)
 }
+
+# som = onco.matrix(mut = PRAD.IMPACT.mut.somatic, cna = PRAD.IMPACT.cna, fusion = PRAD.IMPACT.fusion)
+# write.table(som, file = '~/Documents/MSKCC/03_Prostate/tmp_data/somatic_alteration_matrix.txt', sep = '\t')  
+
+
 
