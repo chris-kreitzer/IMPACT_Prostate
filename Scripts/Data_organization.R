@@ -1,19 +1,18 @@
 ## MSK IMPACT: Data files and sample organization:
 ## Specifically working with IMPACT-PRAD samples: 
 
-
 ## raw data:
 ## obtained from https://github.mskcc.org/knowledgesystems/dmp-2020/tree/master/mskimpact
 ## retrieval date: 09/01/2020
 ## data stored locally
-
-
 PRAD_meta.data = read.csv('~/Documents/MSKCC/00_Data/IMPACT_DATA_2020.08/IMPACT_PRAD.tsv', sep = '\t')
+PRAD_meta.data = PRAD_meta.data[!PRAD_meta.data$Gene.Panel == 'ACCESS129', ]
 
 ## mutations
 IMPACT_mutations = read.csv('~/Documents/MSKCC/00_Data/IMPACT_DATA_2020.08/data_mutations_extended.txt', sep = '\t')
-PRAD.IMPACT.mut = IMPACT_mutations[IMPACT_mutations$Tumor_Sample_Barcode %in% PRAD.samples$sample.ID, ]
+PRAD.IMPACT.mut = IMPACT_mutations[IMPACT_mutations$Tumor_Sample_Barcode %in% PRAD_meta.data$Sample.ID, ]
 PRAD.IMPACT.mut.somatic = PRAD.IMPACT.mut[which(PRAD.IMPACT.mut$Mutation_Status == 'SOMATIC'), ]
+PRAD.IMPACT.mut.germline = PRAD.IMPACT.mut[which(PRAD.IMPACT.mut$Mutation_Status == 'GERMLINE'), ]
 
 ## cna
 IMPACT_cna = read.csv('~/Documents/MSKCC/00_Data/IMPACT_DATA_2020.08/data_CNA.txt', sep = '\t')
@@ -25,16 +24,15 @@ data.cna = data.cna[-1, ]
 row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
 row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
 row.names(data.cna) = sub(pattern = '\\.', replacement = '-', x = row.names(data.cna))
-PRAD.IMPACT.cna = data.cna[row.names(data.cna) %in% PRAD.samples$sample.ID, ]
+PRAD.IMPACT.cna = data.cna[row.names(data.cna) %in% PRAD_meta.data$Sample.ID, ]
 
 ## fusion
 IMPACT_fusion = read.csv('~/Documents/MSKCC/00_Data/IMPACT_DATA_2020.08/data_fusions.txt', sep = '\t')
-PRAD.IMPACT.fusion = IMPACT_fusion[IMPACT_fusion$Tumor_Sample_Barcode %in% PRAD.samples$sample.ID, ]
+PRAD.IMPACT.fusion = IMPACT_fusion[IMPACT_fusion$Tumor_Sample_Barcode %in% PRAD_meta.data$Sample.ID, ]
 
 ## structural variants:
 Impact_SV = read.csv('~/Documents/MSKCC/00_Data/IMPACT_DATA_2020.08/data_Structural_variant.txt', sep = '\t')
-PRAD.IMPACT.SV = Impact_SV[Impact_SV$SampleId %in% PRAD.samples$sample.ID, ]
-
+PRAD.IMPACT.SV = Impact_SV[Impact_SV$SampleId %in% PRAD_meta.data$Sample.ID, ]
 
 
 ## function which selects ONE sample per patient
@@ -52,24 +50,32 @@ sample_selection = function(data){
     # one sample; go for it
     if(nrow(data.sub) == 1){
       chosen.sample = data.sub$Sample.ID
+      sample.type = data.sub$Sample.Type
+      metastatic.site = data.sub$Metastatic.Site
       } 
     
     # if multiple samples and primary available, choose primary
     else if (nrow(data.sub) != 1 && 'Primary' %in% data.sub$Sample.Type){
-      chosen.sample = data.sub$Sample.ID[which(data.sub$Sample.Type == 'Primary' && data.sub$Sample.Class == 'Tumor')]
+      chosen.sample = data.sub$Sample.ID[which(data.sub$Sample.Type == 'Primary')]
       chosen.sample = ifelse(length(chosen.sample) != 1, 
                              data.sub$Sample.ID[which.max(data.sub$Tumor.Purity)],
                              chosen.sample)
+      sample.type = data.sub$Sample.Type
+      metastatic.site = data.sub$Metastatic.Site
     }
     
     # if multiple samples and no primary, choose sample with max purity
     else if (nrow(data.sub) != 1 && 'Primary' != data.sub$Sample.Type){
       chosen.sample = data.sub$Sample.ID[which.max(data.sub$Tumor.Purity)]
+      sample.type = data.sub$Sample.Type
+      metastatic.site = data.sub$Metastatic.Site
     }
     
     data.out = data.frame(patient.ID = rep(i, length(chosen.sample)),
                           sample.ID = chosen.sample,
-                          panel = data.sub$Gene.Panel[which(data.sub$Sample.ID == chosen.sample)])
+                          panel = data.sub$Gene.Panel[which(data.sub$Sample.ID == chosen.sample)],
+                          sample.type = sample.type,
+                          metastatic.site = metastatic.site)
     
     data.analysis = rbind(data.analysis, data.out)
   }
@@ -94,8 +100,8 @@ save(PRAD.samples,
      PRAD.IMPACT.cna, 
      PRAD.IMPACT.fusion, 
      PRAD.IMPACT.SV,
-     PRAD_IMPACT_TMB,
-     PRAD.IMPACT.indel,
+     #PRAD_IMPACT_TMB,
+     #PRAD.IMPACT.indel,
      PRAD_meta.data,
      file = '~/Documents/MSKCC/03_Prostate/tmp_data/data.files.RData')
 
