@@ -10,7 +10,10 @@
 mutation.matrix = function(mut, cna){
   gene.panel = read.csv('~/Documents/MSKCC/00_Data/IMPACT_DATA_2020.08/impact468_gene_panel.txt', sep = '\t')
   sample = data.frame(genes = 'Sample.ID')
-  gene.panel = rbind(sample, gene.panel)
+  missing.genes = data.frame(genes = c('KMT2A',
+                                       'KMT2C',
+                                       'KMT2D'))
+  gene.panel = rbind(sample, missing.genes, gene.panel)
   
   # data somatic mutations
   data.mut = as.data.frame(mut)

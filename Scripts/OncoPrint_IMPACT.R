@@ -43,13 +43,6 @@ for(i in colnames(som.mat)){
 }
 
 
-# TMB annotation
-meta.column = merge(meta.column, PRAD_IMPACT_TMB[, c('Sample', 'TMB')],
-                    by.x = 'sample.id', by.y = 'Sample', all.x = T)
-
-# INDEL annotation
-meta.column = merge(meta.column, PRAD.IMPACT.indel[,c('Sample.ID', 'rel.indel.burden')],
-                    by.x = 'sample.id', 'Sample.ID', all.x = T)
 
 # Sequencing coverage info
 meta.column = merge(meta.column, PRAD_meta.data[,c('Sample.ID', 'Sample.coverage')],
@@ -66,6 +59,11 @@ row.names(meta.column) = meta.column$sample.id
 meta.column$Tumor.Purity = as.numeric(as.character(meta.column$Tumor.Purity))
 meta.column$sample.id = NULL
 
+
+som.mat.df = as.data.frame(som.mat)
+som.mat.df.out = as.data.frame(colSums(som.mat.df != ""))
+colnames(som.mat.df.out) = 'freq'
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # make top annotation
 library(ComplexHeatmap)
@@ -76,41 +74,35 @@ purity.color = circlize::colorRamp2(seq(10, 95, length = 3),
                                     c('#7c97ad', '#3e4245', '#292929'))
 
 
-top = HeatmapAnnotation(TMB = anno_barplot(meta.column$TMB,
-                                           which = 'column', 
-                                           border = T, 
-                                           height = unit(2, "cm"), 
-                                           baseline = 0, 
-                                           axis = T,
-                                           bar_width = 2,
-                                           gp = gpar(fontsize = 8,
-                                                     side = 'left',
-                                                     border = NA, 
-                                                     fill = "red", 
-                                                     lty = "blank")),
-                                           
-                        INDEL = anno_barplot(meta.column$rel.indel.burden,
-                                             which = 'column', 
-                                             border = T, 
-                                             height = unit(2, "cm"), 
-                                             baseline = 0, 
-                                             axis = T,
-                                             gp = gpar(fontsize = 8,
-                                                       side = 'left')),
+
+top = HeatmapAnnotation(
+                        mutations = anno_barplot(
+                          som.mat.df.out$freq,
+                          bar_width = 1,
+                          gp = gpar(col = 'black'),
+                          border = T,
+                          height = unit(2, 'cm')),
                         
+                        # ERG Status
                         ERG = anno_simple(meta.column$ERG_status,
                                           col = c('Fusion' = '#2f4e9d',
-                                                  'no_Fusion' = '#b8d8e8')),
+                                                  'no_Fusion' = '#b8d8e8'),
+                                          height = unit(3, 'mm')),
+                        # Coverage
+                        Coverage = anno_simple(meta.column$Sample.coverage, col = coverage.color,
+                                               height = unit(3, 'mm')),
                         
-                        Coverage = anno_simple(meta.column$Sample.coverage, col = coverage.color),
+                        # Purity
+                        Purity = anno_simple(meta.column$Tumor.Purity, col = purity.color,
+                                             height = unit(3, 'mm')),
                         
-                        Purity = anno_simple(meta.column$Tumor.Purity, col = purity.color),
-                        
+                        # Race annotation
                         Race = anno_simple(meta.column$Race.Category, col = c("WHITE" = "#b84050",
                                                                               'REFUSED TO ANSWER' = '#87abce',
                                                                               "BLACK OR AFRICAN AMERICAN" = '#e9ac66',
                                                                               "ASIAN-FAR EAST/INDIAN SUBCONT" = '#b8d8e8',
-                                                                              "OTHER" = '#d76c47')),
+                                                                              "OTHER" = '#d76c47'),
+                                           height = unit(3, "mm")),
                         
                         gap = unit(2, "mm"),
                         
@@ -118,61 +110,77 @@ top = HeatmapAnnotation(TMB = anno_barplot(meta.column$TMB,
                         
                         annotation_legend_param = list())
                         
-## look at NEJM (TRACERx lung)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# row.labels: split into pathways:
-# select pathways
-pathways = load(file = '~/Documents/MSKCC/00_Data/OncoPath12.Rdata')
-pathways = get(pathways)
-
+# 
 meta.rows = data.frame(genes = row.names(som.mat))
-for(i in 1:nrow(meta.rows)){
-  meta.rows$pathway[i] = ifelse(sum(grepl(meta.rows$genes[i], pathways)) == 1, unique(names(pathways)[grepl(meta.rows$genes[i], pathways)]),
-                                'not.available')
-}
-
-row.names(meta.rows) = meta.rows[, 'genes']
+meta.rows$pathway = NA
 
 # add specific category to certain genes; TP53, AR, SPOP and FOXA1, RB1, IDH
-meta.rows[meta.rows$genes == 'AR', 'pathway'] = 'first'
-meta.rows[meta.rows$genes == 'SPOP', 'pathway'] = 'first'
-meta.rows[meta.rows$genes == 'TP53', 'pathway'] = 'first'
-meta.rows[meta.rows$genes == 'FOXA1', 'pathway'] = 'first'
-meta.rows[meta.rows$genes == 'RB1', 'pathway'] = 'first'
-meta.rows[meta.rows$genes == 'IDH', 'pathway'] = 'first'
+meta.rows[meta.rows$genes == 'AR', 'pathway'] = ''
+meta.rows[meta.rows$genes == 'PTEN', 'pathway'] = ''
+meta.rows[meta.rows$genes == 'TP53', 'pathway'] = ''
+meta.rows[meta.rows$genes == 'RB1', 'pathway'] = ''
+meta.rows[meta.rows$genes == 'IDH1', 'pathway'] = ''
+meta.rows[meta.rows$genes == 'SPOP', 'pathway'] = ''
+meta.rows[meta.rows$genes == 'FOXA1', 'pathway'] = ''
 
-# set genes with no pathway annotation to NA
-meta.rows[meta.rows$pathway == 'not.available', 'pathway'] = 'NA'
-meta.rows$pathway = factor(meta.rows$pathway, levels = c('first',
-                                                         'RTK_RAS',
-                                                         'Epigenetic',
-                                                         'DDR',
-                                                         'PI3K',
-                                                         'Cell_Cycle',
-                                                         'NOTCH',
-                                                         'WNT',
-                                                         'TGF-Beta',
-                                                         'HIPPO',
-                                                         'MYC',
-                                                         'NRF2',
-                                                         'TP53',
-                                                         'NA'))
+meta.rows = meta.rows[!is.na(meta.rows$pathway),, drop = F]
 
-## Exclude genes with frequency < 2 %
-count.matrix = as.data.frame(rowSums(som.mat != ""))
-colnames(count.matrix) = 'Frequency'
-count.matrix$alteration_frequency = count.matrix$Frequency / ncol(som.mat)
-count.matrix = count.matrix[count.matrix$alteration_frequency >= 0.02, ]
-genes.remaining = as.character(row.names(count.matrix))
+# DNA repair
+DNA.repair = data.frame(genes = c('BRCA2',
+               'BRCA1',
+               'ATM',
+               'FANCA',
+               'CDK12',
+               'MSH2',
+               'MLH1'),
+               pathway = 'DNA repair')
+               
+# PI3K pathway
+PI3K = data.frame(genes = c('PIK3CA',
+                            'PIK3R1',
+                            'AKT1',
+                            'AKT3'),
+                  pathway = 'PI3K pathway')
 
-meta.rows = meta.rows[row.names(meta.rows) %in% genes.remaining, ]
 
-# exclude TMPRSS2 and ERG from meta.rows
-meta.rows = meta.rows[!meta.rows$genes %in% c('TMPRSS2', 'ERG'), ]
+# Wnt pathway
+Wnt = data.frame(genes = c('APC',
+                           'CTNNB1',
+                           'RNF43'),
+                 pathway = 'Wnt pathway')
 
+
+
+# MAPK pathway 
+MAPK = data.frame(genes = c('BRAF',
+                            'HRAS',
+                            'KRAS'),
+                  pathway = 'MAPK pathway')
+
+
+# chromatin remodeling
+Chromatin = data.frame(genes = c('KMT2A',
+                                 'KMT2C',
+                                 'KMT2D',
+                                 'KDM6A'),
+                       pathway = 'Chromatin Remodeling')
+
+
+meta.rows = rbind(meta.rows,
+                  DNA.repair,
+                  PI3K,
+                  Wnt,
+                  MAPK,
+                  Chromatin)
+
+row.names(meta.rows) = meta.rows$genes
+meta.rows$pathway = factor(meta.rows$pathway, levels = c('', 'DNA repair', 'PI3K pathway', 'Wnt pathway', 
+                                                         'MAPK pathway', 'Chromatin Remodeling'))
 meta.rows$genes = NULL
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -187,15 +195,17 @@ som.mat.print = som.mat[row.names(som.mat) %in% row.names(meta.rows), colnames(s
 # exclude TMP and ERG (as those display a own group)
 som.mat.print = som.mat.print[!row.names(som.mat.print) %in% c('TMPRSS2', 'ERG'), ]
 
+som.mat.print = som.mat.print[order(match(row.names(som.mat.print), row.names(meta.rows))), ]
+
 ## change global options (padding between top annotation and heatmap)
-ht_opt$COLUMN_ANNO_PADDING = unit(6, "mm")
+ht_opt$COLUMN_ANNO_PADDING = unit(2.5, "mm")
 
 x.first = ComplexHeatmap::oncoPrint(som.mat.print,
-                          name = 'race',
-                          row_names_gp = gpar(fontsize = 7),
+                          row_names_gp = gpar(fontsize = 10),
                           row_names_side = 'left',
-                          pct_side = FALSE,
                           alter_fun = alter_fun, 
+                          pct_side = 'right',
+                          show_pct = T,
                           column_gap = unit(2.5, 'mm'),
                           col = col,
                           top_annotation = top,
@@ -211,8 +221,6 @@ x.first = ComplexHeatmap::oncoPrint(som.mat.print,
                           column_title = NULL,
                           width = unit(18, 'cm'),
                           height = unit(18, 'cm'))
-
-
 
 # with draw we can make additional modification on the output
 
@@ -233,13 +241,14 @@ draw(x.first,
 ))
 
 
+
 # define color-space for alterations:
-col = c("deep_deletion" = "#2f4e9d", 
-        "AMP" = "#a20414",
-        'Fusion' = '#960b79',
-        "Missense_Mutation" = "#008000",
-        'Truncating_Mutation' = '#b88e38',
-        'Inframe_Mutation' = '#000000',
+col = c("deep_deletion" = "#0C02FF", 
+        "AMP" = "#FF0101",
+        'Fusion' = '#8B02C9',
+        "Missense_Mutation" = "#008004",
+        'Truncating_Mutation' = '#000000',
+        'Inframe_Mutation' = '#A78029',
         'VUS' = '#88d332')
 
 # function to draw geometric shapes for oncoprint
