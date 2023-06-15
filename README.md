@@ -40,3 +40,5 @@ rel.INDEL.load = ('INS' + 'DEL') / ('INS' + 'DEL' + 'SNP' + 'DNP' + 'ONP')
 - only genes with alteration frequency > 2% are shown
 - TMB/INDEL load (top annotation) are calculated like points mentioned above
 - SOMATIC alterations are excluded from the OncoPrint
+
+Harmonization of TMB!
